@@ -1,15 +1,30 @@
 import React from "react"
 import Layout from "../components/layout"
-import { graphql } from "gatsby"
+import { graphql, useStaticQuery } from "gatsby"
 
-const BlogPage = ({ data }) => {
+const BlogPage = () => {
+  const data = useStaticQuery(graphql`
+    query {
+      allMarkdownRemark {
+        edges {
+          node {
+            frontmatter {
+              title
+              date
+            }
+          }
+        }
+      }
+    }
+  `)
   return (
     <Layout>
       <h1>Blog page</h1>
       <ol>
-        {data.allMarkdownRemark.edges.map(post => (
+        {data.allMarkdownRemark.edges.map(edge => (
           <li>
-            <h2>{post.node.frontmatter.title}</h2>
+            <h2>{edge.node.frontmatter.title}</h2>
+            <p>{edge.node.frontmatter.date}</p>
           </li>
         ))}
       </ol>
@@ -18,17 +33,3 @@ const BlogPage = ({ data }) => {
 }
 
 export default BlogPage
-
-export const query = graphql`
-  query {
-    allMarkdownRemark {
-      edges {
-        node {
-          frontmatter {
-            title
-          }
-        }
-      }
-    }
-  }
-`
