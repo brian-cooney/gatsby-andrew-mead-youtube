@@ -1,25 +1,52 @@
 import React from "react"
-import { useStaticquery } from "gatsby"
+import { useStaticQuery, graphql } from "gatsby"
 import Layout from "../components/layout"
+import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
+import Head from "../components/head"
 
-const Blog = () => {
-  const post = useStaticquery(graphql`
-    query {
-      allMarkdownRemark {
-        edges {
-          node {
-            rawMarkdownBody
-            html
-          }
-        }
+// export const query = graphql`
+//   query($slug: String) {
+//     markdownRemark(fields: { slug: { eq: $slug } }) {
+//       frontmatter {
+//         title
+//         date
+//       }
+//       html
+//     }
+//   }
+// `
+
+export const query = graphql`
+  query($slug: String!) {
+    contentfulBlogPost(slug: { eq: $slug }) {
+      title
+      publishedDate(formatString: "DD, MM, YYYY")
+      body {
+        json
       }
     }
-  `)
+  }
+`
+
+const Blog = props => {
+  const options = {
+    renderNode: {
+      "embedded-asset-block": node => {
+        const alt = node.data.target.fields.title["en-GB"]
+        const url = node.data.target.fields.file["en-GB"].url
+        return <img src={url} alt={alt} />
+      },
+    },
+  }
   return (
     <Layout>
-      <div>
-        <h1>This is the blog template</h1>
-      </div>
+      <Head title={props.data.contentfulBlogPost.title} />
+      <h1>{props.data.contentfulBlogPost.title}</h1>
+      <p>{props.data.contentfulBlogPost.title}</p>
+      {documentToReactComponents(
+        props.data.contentfulBlogPost.body.json,
+        options
+      )}
     </Layout>
   )
 }
